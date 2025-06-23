@@ -41,7 +41,7 @@ jobs:
         DOCKER_TLS_VERIFY: ""
 
     - name: Save test reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: test-reports
