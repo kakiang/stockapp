@@ -1,4 +1,4 @@
-name: Java CI with Maven and Testcontainers
+name: stockapp actions-ci
 
 on:
   push:
