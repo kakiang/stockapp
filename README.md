@@ -2,7 +2,7 @@
 
 [![stockapp actions-ci](https://github.com/kakiang/stockapp/actions/workflows/maven.yml/badge.svg)](https://github.com/kakiang/stockapp/actions/workflows/maven.yml)
 
-A demo project for managing stock data, built with Spring Boot.
+Stock Data Management API built with Spring Boot and PostgreSQL, testing uses Testcontainers.
 
 ## Getting Started
 
