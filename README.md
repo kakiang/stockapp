@@ -1,6 +1,6 @@
 # stockapp
 
-[![Java CI with Maven and Testcontainers](https://github.com/kakiang/stockapp/actions/workflows/maven.yml/badge.svg)](https://github.com/kakiang/stockapp/actions/workflows/maven.yml)
+[![stockapp actions-ci](https://github.com/kakiang/stockapp/actions/workflows/maven.yml/badge.svg)](https://github.com/kakiang/stockapp/actions/workflows/maven.yml)
 
 A demo project for managing stock data, built with Spring Boot.
 
