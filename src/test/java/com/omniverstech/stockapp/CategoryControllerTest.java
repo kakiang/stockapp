@@ -62,8 +62,8 @@ public class CategoryControllerTest {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
 
-    private Long testCategoryId = new Random().nextLong(18,25);
-    private Long secondCategoryId = new Random().nextLong(26, 39);
+    private Long testCategoryId;
+    private Long secondCategoryId;
 
     @BeforeEach
     void setUp() {

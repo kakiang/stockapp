@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.omniverstech.stockapp.entities.projection.ProductRecord;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +16,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,12 +35,17 @@ public class Product implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @JsonProperty("product_code")
     @Column(length=20, nullable = false, unique = true)
     private String productCode;
 
+    @NotBlank
+    @JsonProperty("product_name")
     @Column(length = 100, nullable = false)
     private String productName;
 
+    @PositiveOrZero
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
@@ -82,6 +91,10 @@ public class Product implements Serializable{
                 + ", categoryId=" + (category != null ? category.getId() : "null") +
                ", categoryNom='" + (category != null ? category.getCategoryName() : "null") + '\'' +
                ']';
-    } 
+    }
+
+    public ProductRecord toRecord() {
+        return new ProductRecord(id, productCode, productName, category.toRecord());
+    }
     
 }

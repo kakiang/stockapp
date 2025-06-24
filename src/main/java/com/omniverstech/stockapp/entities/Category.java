@@ -8,6 +8,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.omniverstech.stockapp.entities.projection.CategoryRecord;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,6 +55,10 @@ public class Category implements Serializable {
     public Category(String categoryCode, String categoryName) {
         this.categoryCode = categoryCode;
         this.categoryName = categoryName;
+    }
+
+    public CategoryRecord toRecord() {
+        return new CategoryRecord(id, this.categoryCode, this.categoryName);
     }
 
 }
