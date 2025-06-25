@@ -16,15 +16,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "products")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product implements Serializable{
@@ -45,7 +48,7 @@ public class Product implements Serializable{
     @Column(length = 100, nullable = false)
     private String productName;
 
-    @PositiveOrZero
+    @DecimalMin("0.00")
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
@@ -87,14 +90,14 @@ public class Product implements Serializable{
 
     @Override
     public String toString() {
-        return "Produit [id=" + id + ", productCode=" + productCode + ", productName=" + productName + ", price=" + price
+        return "Product [id=" + id + ", productCode=" + productCode + ", productName=" + productName + ", price=" + price
                 + ", categoryId=" + (category != null ? category.getId() : "null") +
-               ", categoryNom='" + (category != null ? category.getCategoryName() : "null") + '\'' +
+               ", categoryName='" + (category != null ? category.getCategoryName() : "null") + '\'' +
                ']';
     }
 
     public ProductRecord toRecord() {
-        return new ProductRecord(id, productCode, productName, category.toRecord());
+        return new ProductRecord(this);
     }
-    
+
 }

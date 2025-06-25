@@ -18,20 +18,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByProductName(String productName);
 
-    List<Product> findByCategory_Id(Long categoryId);
-
-    List<Product> findByCategory_CategoryName(String categoryName);
-
     boolean existsByProductCode(String productCode);
 
-    @Query("SELECT p FROM Product p JOIN FETCH p.category WHERE p.id = :id")
+    @Query("SELECT DISTINCT p FROM Product p JOIN FETCH p.category WHERE p.id = :id")
     Optional<Product> findByIdWithCategory(@Param("id") Long id);
 
-    @Query("SELECT p FROM Product p JOIN FETCH p.category WHERE p.id = :id")
-    Optional<ProductRecord> findProductRecordById(@Param("id") Long id);
+    @Query("SELECT DISTINCT p FROM Product p JOIN FETCH p.category")
+    List<Product> findAllWithCategories();
 
-//    Optional<ProductRecord> findProductRecordByProductCode(String productCode);
-//    List<ProductRecord> findProductRecordsByProductName(String productName);
-
+    @Query("SELECT DISTINCT p FROM Product p JOIN FETCH p.category WHERE p.category.id = :id")
+    List<Product> findAllByCategory_Id(@Param("id")  Long categoryId);
 
 }

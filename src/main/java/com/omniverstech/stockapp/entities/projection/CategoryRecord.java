@@ -11,4 +11,8 @@ public record CategoryRecord(
     public CategoryRecord(Category category) {
         this(category.getId(), category.getCategoryCode(), category.getCategoryName());
     }
+
+    public Category toCategory() {
+        return new Category(categoryCode,categoryName);
+    }
 }

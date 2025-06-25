@@ -1,17 +1,15 @@
 package com.omniverstech.stockapp.service;
 
 import com.omniverstech.stockapp.entities.Product;
-import com.omniverstech.stockapp.entities.projection.ProductRecord;
 import com.omniverstech.stockapp.exceptions.DuplicateResourceException;
 import com.omniverstech.stockapp.exceptions.ResourceNotFoundException;
 import com.omniverstech.stockapp.repo.CategoryRepository;
 import com.omniverstech.stockapp.repo.ProductRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,24 +18,27 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.findAllWithCategories();
     }
 
-    public ProductRecord getProductRecordById(Long id) {
+    public List<Product> getProductsByCategoryId(Long categoryId){
+        return productRepository.findAllByCategory_Id(categoryId);
+    }
+
+    public Product getProductRecordById(Long id) {
         return productRepository.findByIdWithCategory(id)
-                .map(ProductRecord::new)
                 .orElseThrow(()-> new ResourceNotFoundException("Product", "id", id));
     }
 
     @Transactional
-    public ProductRecord createProduct(Product product, Long categoryId) {
+    public Product createProduct(Product product, Long categoryId) {
         if (productRepository.existsByProductCode(product.getProductCode())) {
-            throw new DuplicateResourceException("Product", "productCode", product.getProductCode());
+            throw new DuplicateResourceException("Product", "product_code", product.getProductCode());
         }
         var category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
         product.setCategory(category);
-        return productRepository.save(product).toRecord();
+        return productRepository.save(product);
     }
 
     @Transactional
@@ -64,14 +65,6 @@ public class ProductService {
             throw new RuntimeException("No product found with  id=" + id);
         }
         productRepository.deleteById(id);
-    }
-
-    public List<Product> getProductsByCategoryId(Long categoryId) {
-        return productRepository.findByCategory_Id(categoryId);
-    }
-
-    public List<Product> getProductsByCategoryNom(String categoryNom) {
-        return productRepository.findByCategory_CategoryName(categoryNom);
     }
 
     @Transactional
