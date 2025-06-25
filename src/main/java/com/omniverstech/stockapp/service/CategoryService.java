@@ -32,8 +32,8 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryRecord createCategory(Category Category) {
-        return toRecord(categoryRepository.save(Category));
+    public Category createCategory(Category Category) {
+        return categoryRepository.save(Category);
     }
 
     @Transactional

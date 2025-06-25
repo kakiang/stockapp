@@ -21,13 +21,15 @@ public class ProductService {
         return productRepository.findAllWithCategories();
     }
 
-    public List<Product> getProductsByCategoryId(Long categoryId){
+    public List<Product> getProductsByCategoryId(Long categoryId) {
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
         return productRepository.findAllByCategory_Id(categoryId);
     }
 
     public Product getProductRecordById(Long id) {
         return productRepository.findByIdWithCategory(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Product", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
     }
 
     @Transactional
@@ -49,7 +51,7 @@ public class ProductService {
     @Transactional
     public Product updateProduct(Long id, Product productDetails, Long categoryId) {
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() ->  new ResourceNotFoundException("product", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("product", "id", id));
         existingProduct.setProductCode(productDetails.getProductCode());
         existingProduct.setProductName(productDetails.getProductName());
         if (categoryId != null) {
@@ -70,7 +72,6 @@ public class ProductService {
     @Transactional
     public void deleteAllProducts() {
         productRepository.deleteAll();
-        ;
     }
 
 

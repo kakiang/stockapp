@@ -69,9 +69,9 @@ public class CategoryControllerTest {
     void setUp() {
         categoryService.deleteCategories();
         Category testCategory = new Category("TEST", "Test Category");
-        testCategoryId = categoryService.createCategory(testCategory).id();
+        testCategoryId = categoryService.createCategory(testCategory).getId();
         Category secondCategory = new Category("SECOND", "Second Category");
-        secondCategoryId = categoryService.createCategory(secondCategory).id();
+        secondCategoryId = categoryService.createCategory(secondCategory).getId();
     }
 
     @Test
