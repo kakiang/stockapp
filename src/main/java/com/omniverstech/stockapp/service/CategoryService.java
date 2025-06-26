@@ -54,22 +54,21 @@ public class CategoryService {
     }
 
     @Transactional
-    public boolean deleteCategory(Long id) {
-         return categoryRepository.findById(id).map(Category -> {
-            if (!Category.getProducts().isEmpty()) {
-                 throw new DataIntegrityViolationException("Cannot delete category with associated products.");
-            }
-            categoryRepository.deleteById(id);
-            return true;
-        }).orElseThrow(()->new ResourceNotFoundException("Category", "id", id));
+    public void deleteCategory(Long id) {
+        var cat = categoryRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Category", "id", id));
+        if (!cat.getProducts().isEmpty()) {
+            throw new DataIntegrityViolationException("Cannot delete category with associated products.");
+        }
+        categoryRepository.deleteById(id);
     }
 
     @Transactional
-    public void deleteCategories(){
+    public void deleteCategories() {
         categoryRepository.deleteAll();
     }
 
-    private CategoryRecord toRecord(Category category){
+    private CategoryRecord toRecord(Category category) {
         return new CategoryRecord(category.getId(), category.getCategoryCode(), category.getCategoryName());
     }
 }
