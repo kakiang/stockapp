@@ -134,26 +134,26 @@ public class ProductControllerTest {
 
     @Test
     void createProduct_ShouldReturnCreatedProduct() {
-        var id = categoryService.getAllCategoryRecords().getFirst().id();
-        Product tablet = new Product("TBO01", "Tablet", BigDecimal.valueOf(899.99));
-        ResponseEntity<Product> response = restTemplate.postForEntity("/api/products?category_id=" + id, tablet, Product.class);
+        var categoryId = categoryService.getAllCategoryRecords().getFirst().id();
+        var tablet = new ProductInputRecord("TBO01", "Tablet", BigDecimal.valueOf(899.99), categoryId);
+        ResponseEntity<ProductRecord> response = restTemplate.postForEntity("/api/products", tablet, ProductRecord.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody().getProductCode()).isEqualTo("TBO01");
+        assertThat(response.getBody().productCode()).isEqualTo("TBO01");
     }
 
     @Test
     void createProduct_WithExistingCode_ShouldReturn409Conflict() {
         var code = productService.getAllProducts().getFirst().getProductCode();
-        var id = categoryService.getAllCategoryRecords().getFirst().id();
-        Product tablet = new Product(code, "Tablet", BigDecimal.valueOf(899.99));
-        ResponseEntity<Object> response = restTemplate.postForEntity("/api/products?category_id=" + id, tablet, Object.class);
+        var categoryId = categoryService.getAllCategoryRecords().getFirst().id();
+        var tablet = new ProductInputRecord(code, "Tablet", BigDecimal.valueOf(899.99), categoryId);
+        ResponseEntity<Object> response = restTemplate.postForEntity("/api/products", tablet, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
     void createProduct_WithInvalidCategoryId_ShouldReturnNotFound() {
-        Product tablet = new Product("TBO01", "Tablet", BigDecimal.valueOf(899.99));
-        ResponseEntity<Object> response = restTemplate.postForEntity("/api/products?category_id=999", tablet, Object.class);
+        var tablet = new ProductInputRecord("TBO01", "Tablet", BigDecimal.valueOf(899.99), Long.valueOf(999));
+        ResponseEntity<Object> response = restTemplate.postForEntity("/api/products", tablet, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 

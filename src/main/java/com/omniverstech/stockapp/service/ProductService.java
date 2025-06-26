@@ -35,13 +35,17 @@ public class ProductService {
     }
 
     @Transactional
-    public Product createProduct(Product product, Long categoryId) {
-        if (productRepository.existsByProductCode(product.getProductCode())) {
-            throw new DuplicateResourceException("Product", "product_code", product.getProductCode());
+    public Product createProduct(ProductInputRecord productInputRecord) {
+        if (productRepository.existsByProductCode(productInputRecord.productCode())) {
+            throw new DuplicateResourceException("Product", "product_code", productInputRecord.productCode());
         }
-        var category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
-        product.setCategory(category);
+        var category = categoryRepository.findById(productInputRecord.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", productInputRecord.categoryId()));
+        var product = new Product();
+        product.setProductCode(productInputRecord.productCode())
+                .setProductName(productInputRecord.productName())
+                .setPrice(productInputRecord.price())
+                .setCategory(category);
         return productRepository.save(product);
     }
 

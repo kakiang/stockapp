@@ -41,10 +41,9 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductRecord> createProduct(
-            @RequestBody @Valid Product product,
-            @RequestParam(name = "category_id") Long categoryId) {
+            @RequestBody @Valid ProductInputRecord product) {
         return new ResponseEntity<>(
-                productService.createProduct(product, categoryId).toRecord(),
+                productService.createProduct(product).toRecord(),
                 HttpStatus.CREATED);
     }
 
