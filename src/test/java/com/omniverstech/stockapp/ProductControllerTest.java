@@ -2,6 +2,7 @@ package com.omniverstech.stockapp;
 
 import com.omniverstech.stockapp.entities.Category;
 import com.omniverstech.stockapp.entities.Product;
+import com.omniverstech.stockapp.entities.projection.ProductInputRecord;
 import com.omniverstech.stockapp.entities.projection.ProductRecord;
 import com.omniverstech.stockapp.repo.ProductRepository;
 import com.omniverstech.stockapp.service.CategoryService;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,11 +67,11 @@ public class ProductControllerTest {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
 
-    List<Long>  productIds = new ArrayList<>();
-    List<Long>  categoryIds = new ArrayList<>();
+    List<Long> productIds = new ArrayList<>();
+    List<Long> categoryIds = new ArrayList<>();
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         productService.deleteAllProducts();
         categoryService.deleteCategories();
 
@@ -104,28 +106,28 @@ public class ProductControllerTest {
     }
 
     @Test
-    void getProductsByCategoryId_ShouldReturnProductsByCategoryId(){
+    void getProductsByCategoryId_ShouldReturnProductsByCategoryId() {
         var id = categoryService.getAllCategoryRecords().getFirst().id();
-        ResponseEntity<List> response = restTemplate.getForEntity("/api/products?category_id="+id, List.class);
+        ResponseEntity<List> response = restTemplate.getForEntity("/api/products?category_id=" + id, List.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(2);
     }
 
     @Test
-    void getProductsByCategoryId_WithInvalidCategoryId_ShouldReturnNotFound(){
+    void getProductsByCategoryId_WithInvalidCategoryId_ShouldReturnNotFound() {
         ResponseEntity<Object> response = restTemplate.getForEntity("/api/products?category_id=999", Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void getProductById_ShouldReturnProductById(){
+    void getProductById_ShouldReturnProductById() {
         var id = productService.getAllProducts().getFirst().getId();
-        ResponseEntity<ProductRecord> response = restTemplate.getForEntity("/api/products/"+id, ProductRecord.class);
+        ResponseEntity<ProductRecord> response = restTemplate.getForEntity("/api/products/" + id, ProductRecord.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    void getProductById_WithInvalidId_ShouldReturnNotFound(){
+    void getProductById_WithInvalidId_ShouldReturnNotFound() {
         ResponseEntity<Object> response = restTemplate.getForEntity("/api/products/999", Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -134,7 +136,7 @@ public class ProductControllerTest {
     void createProduct_ShouldReturnCreatedProduct() {
         var id = categoryService.getAllCategoryRecords().getFirst().id();
         Product tablet = new Product("TBO01", "Tablet", BigDecimal.valueOf(899.99));
-        ResponseEntity<Product> response = restTemplate.postForEntity("/api/products?category_id="+id, tablet, Product.class);
+        ResponseEntity<Product> response = restTemplate.postForEntity("/api/products?category_id=" + id, tablet, Product.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody().getProductCode()).isEqualTo("TBO01");
     }
@@ -144,7 +146,7 @@ public class ProductControllerTest {
         var code = productService.getAllProducts().getFirst().getProductCode();
         var id = categoryService.getAllCategoryRecords().getFirst().id();
         Product tablet = new Product(code, "Tablet", BigDecimal.valueOf(899.99));
-        ResponseEntity<Object> response = restTemplate.postForEntity("/api/products?category_id="+id, tablet, Object.class);
+        ResponseEntity<Object> response = restTemplate.postForEntity("/api/products?category_id=" + id, tablet, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
@@ -156,10 +158,81 @@ public class ProductControllerTest {
     }
 
     @Test
+    void updateProduct_WithValidIdAndData_ShouldReturnUpdatedProduct() {
+        var existingproduct = productService.getAllProducts().getFirst();
+        var categories = categoryService.getAllCategoryRecords();
+        Long categoryId = null;
+
+        for (var category : categories) {
+            if (category.id() != existingproduct.getCategory().getId()) {
+                categoryId = category.id();
+            }
+        }
+        ProductInputRecord updatedDetails = new ProductInputRecord(
+                "updated_code",
+                "updated_name",
+                BigDecimal.valueOf(999.99),
+                categoryId);
+        HttpEntity<ProductInputRecord> request = new HttpEntity<>(updatedDetails);
+
+        ResponseEntity<ProductRecord> response = restTemplate.exchange(
+                "/api/products/" + existingproduct.getId(),
+                HttpMethod.PUT,
+                request,
+                ProductRecord.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().productCode()).isEqualTo("updated_code");
+    }
+
+    @Test
+    void updateProduct_WithInvalidData_ShouldReturnBadRequest() {
+        var existingproduct = productService.getAllProducts().getFirst();
+        var categories = categoryService.getAllCategoryRecords();
+        Long categoryId = null;
+
+        for (var category : categories) {
+            if (category.id() != existingproduct.getCategory().getId()) {
+                categoryId = category.id();
+            }
+        }
+        ProductInputRecord updatedDetails = new ProductInputRecord(
+                "",
+                "",
+                BigDecimal.valueOf(999.99),
+                categoryId);
+        HttpEntity<ProductInputRecord> request = new HttpEntity<>(updatedDetails);
+
+        ResponseEntity<ProductRecord> response = restTemplate.exchange(
+                "/api/products/" + existingproduct.getId(),
+                HttpMethod.PUT,
+                request,
+                ProductRecord.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void updateProduct_WithInvalidCategoryId_ShouldReturnNotFound() {
+        var existingproduct = productService.getAllProducts().getFirst();
+        ProductInputRecord updatedDetails = new ProductInputRecord(
+                "updated_code",
+                "updated_name",
+                BigDecimal.valueOf(999.99),
+                Long.valueOf(999));
+        HttpEntity<ProductInputRecord> request = new HttpEntity<>(updatedDetails);
+        ResponseEntity<ProductRecord> response = restTemplate.exchange(
+                "/api/products/" + existingproduct.getId(),
+                HttpMethod.PUT,
+                request,
+                ProductRecord.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
     void deleteProduct_WithValidId_ShouldReturnNoContent() {
         var id = productService.getAllProducts().getFirst().getId();
         ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/products/"+id,
+                "/api/products/" + id,
                 HttpMethod.DELETE,
                 null,
                 Void.class);

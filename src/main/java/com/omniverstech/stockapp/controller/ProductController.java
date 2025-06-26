@@ -3,6 +3,7 @@ package com.omniverstech.stockapp.controller;
 import java.util.List;
 
 import com.omniverstech.stockapp.entities.Product;
+import com.omniverstech.stockapp.entities.projection.ProductInputRecord;
 import com.omniverstech.stockapp.entities.projection.ProductRecord;
 import com.omniverstech.stockapp.service.ProductService;
 import jakarta.validation.Valid;
@@ -45,6 +46,13 @@ public class ProductController {
         return new ResponseEntity<>(
                 productService.createProduct(product, categoryId).toRecord(),
                 HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductRecord> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductInputRecord productDetails) {
+        var updatedProduct = productService.updateProduct(id, productDetails);
+        return new ResponseEntity<>(updatedProduct.toRecord(),
+                HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

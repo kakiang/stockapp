@@ -1,6 +1,8 @@
 package com.omniverstech.stockapp.service;
 
+import com.omniverstech.stockapp.entities.Category;
 import com.omniverstech.stockapp.entities.Product;
+import com.omniverstech.stockapp.entities.projection.ProductInputRecord;
 import com.omniverstech.stockapp.exceptions.DuplicateResourceException;
 import com.omniverstech.stockapp.exceptions.ResourceNotFoundException;
 import com.omniverstech.stockapp.repo.CategoryRepository;
@@ -49,15 +51,18 @@ public class ProductService {
     }
 
     @Transactional
-    public Product updateProduct(Long id, Product productDetails, Long categoryId) {
+    public Product updateProduct(Long id, ProductInputRecord productDetails) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("product", "id", id));
-        existingProduct.setProductCode(productDetails.getProductCode());
-        existingProduct.setProductName(productDetails.getProductName());
-        if (categoryId != null) {
-            categoryRepository.findById(categoryId).ifPresent(existingProduct::setCategory);
-        }
-        existingProduct.setCategory(productDetails.getCategory());
+
+        Category newCategory = categoryRepository.findById(productDetails.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", productDetails.categoryId()));
+
+        existingProduct.setProductCode(productDetails.productCode());
+        existingProduct.setProductName(productDetails.productName());
+        existingProduct.setPrice(productDetails.price());
+        existingProduct.setCategory(newCategory);
+
         return productRepository.save(existingProduct);
     }
 
