@@ -171,7 +171,7 @@ public class CategoryControllerTest {
     }
 
     @Test
-    void deleteCategory_WithProducts_ShouldReturnBadRequest() throws Exception {
+    void deleteCategory_WithProducts_ShouldReturnConflictError() throws Exception {
         Category newCategory = new Category("CLOTH", "Clothing");
         Product shirt = new Product("SHI001", "T-Shirt", BigDecimal.valueOf(29.99));
         shirt.setCategory(newCategory);
@@ -186,7 +186,7 @@ public class CategoryControllerTest {
                 HttpMethod.DELETE,
                 null,
                 Void.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
 }
