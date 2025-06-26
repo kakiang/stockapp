@@ -2,6 +2,7 @@ package com.omniverstech.stockapp.service;
 
 import com.omniverstech.stockapp.entities.Category;
 import com.omniverstech.stockapp.entities.projection.CategoryRecord;
+import com.omniverstech.stockapp.exceptions.ResourceNotFoundException;
 import com.omniverstech.stockapp.repo.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -53,14 +54,13 @@ public class CategoryService {
 
     @Transactional
     public boolean deleteCategory(Long id) {
-        return categoryRepository.findById(id).map(Category -> {
+         return categoryRepository.findById(id).map(Category -> {
             if (!Category.getProducts().isEmpty()) {
-                // throw new IllegalStateException("Impossible de supprimer une Category avec des produits associés");
-                return false;
+                 throw new IllegalStateException("Impossible to delete a category with products");
             }
             categoryRepository.deleteById(id);
             return true;
-        }).orElse(false);
+        }).orElseThrow(()->new ResourceNotFoundException("Category", "id", id));
     }
 
     @Transactional

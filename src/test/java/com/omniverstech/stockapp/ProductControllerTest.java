@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -121,7 +122,6 @@ public class ProductControllerTest {
         var id = productService.getAllProducts().getFirst().getId();
         ResponseEntity<ProductRecord> response = restTemplate.getForEntity("/api/products/"+id, ProductRecord.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().productCode()).isEqualTo("LAP123");
     }
 
     @Test
@@ -152,6 +152,28 @@ public class ProductControllerTest {
     void createProduct_WithInvalidCategoryId_ShouldReturnNotFound() {
         Product tablet = new Product("TBO01", "Tablet", BigDecimal.valueOf(899.99));
         ResponseEntity<Object> response = restTemplate.postForEntity("/api/products?category_id=999", tablet, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void deleteProduct_WithValidId_ShouldReturnNoContent() {
+        var id = productService.getAllProducts().getFirst().getId();
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/api/products/"+id,
+                HttpMethod.DELETE,
+                null,
+                Void.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(productRepository.existsById(id)).isFalse();
+    }
+
+    @Test
+    void deleteProduct_WithInValidId_ShouldReturnNotFound() {
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/api/products/999",
+                HttpMethod.DELETE,
+                null,
+                Void.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

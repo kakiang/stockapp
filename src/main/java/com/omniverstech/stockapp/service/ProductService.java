@@ -62,11 +62,12 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public boolean deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
-            throw new RuntimeException("No product found with  id=" + id);
+            throw new ResourceNotFoundException("Product", "id", id);
         }
         productRepository.deleteById(id);
+        return true;
     }
 
     @Transactional
