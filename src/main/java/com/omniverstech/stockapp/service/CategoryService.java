@@ -7,6 +7,7 @@ import com.omniverstech.stockapp.repo.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,7 +57,7 @@ public class CategoryService {
     public boolean deleteCategory(Long id) {
          return categoryRepository.findById(id).map(Category -> {
             if (!Category.getProducts().isEmpty()) {
-                 throw new IllegalStateException("Impossible to delete a category with products");
+                 throw new DataIntegrityViolationException("Cannot delete category with associated products.");
             }
             categoryRepository.deleteById(id);
             return true;
