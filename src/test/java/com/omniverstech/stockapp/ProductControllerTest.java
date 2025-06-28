@@ -43,9 +43,6 @@ public class ProductControllerTest {
     private ProductService productService;
 
     @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
     private CategoryRepository categoryRepository;
 
     @Autowired
@@ -78,11 +75,11 @@ public class ProductControllerTest {
     @BeforeEach
     void setUp() {
         productService.deleteAllProducts();
-        categoryService.deleteCategories();
+        categoryRepository.deleteAll();
 
-        Category electronics = categoryService.createCategory(new Category("Electronics", "Gadgets and devices"));
+        Category electronics = categoryRepository.save(new Category("Electronics", "Gadgets and devices"));
         categoryIds.add(electronics.getId());
-        Category books = categoryService.createCategory(new Category("Books", "All genres"));
+        Category books = categoryRepository.save(new Category("Books", "All genres"));
         categoryIds.add(books.getId());
 
         Product laptop = new Product("LAP123", "Laptop", BigDecimal.valueOf(999.99));
@@ -112,7 +109,7 @@ public class ProductControllerTest {
 
     @Test
     void getProductsByCategoryId_ShouldReturnProductsByCategoryId() {
-        var id = categoryService.getAllCategoryRecords().getFirst().id();
+        var id = categoryRepository.findAll().get(0).getId();
         ResponseEntity<List> response = restTemplate.getForEntity("/api/products?category_id=" + id, List.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(2);
@@ -139,7 +136,7 @@ public class ProductControllerTest {
 
     @Test
     void createProduct_ShouldReturnCreatedProduct() {
-        var categoryId = categoryService.getAllCategoryRecords().getFirst().id();
+        var categoryId = categoryRepository.findAll().get(0).getId();
         var tablet = new ProductInputRecord("TBO01", "Tablet", BigDecimal.valueOf(899.99), categoryId);
         ResponseEntity<ProductRecord> response = restTemplate.postForEntity("/api/products", tablet, ProductRecord.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -149,7 +146,7 @@ public class ProductControllerTest {
     @Test
     void createProduct_WithExistingCode_ShouldReturn409Conflict() {
         var code = productService.getAllProducts().getFirst().getProductCode();
-        var categoryId = categoryService.getAllCategoryRecords().getFirst().id();
+        var categoryId = categoryRepository.findAll().get(0).getId();
         var tablet = new ProductInputRecord(code, "Tablet", BigDecimal.valueOf(899.99), categoryId);
         ResponseEntity<Object> response = restTemplate.postForEntity("/api/products", tablet, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
@@ -165,12 +162,12 @@ public class ProductControllerTest {
     @Test
     void updateProduct_WithValidIdAndData_ShouldReturnUpdatedProduct() {
         var existingproduct = productService.getAllProducts().getFirst();
-        var categories = categoryService.getAllCategoryRecords();
+        var categories = categoryRepository.findAll();
         Long categoryId = null;
 
         for (var category : categories) {
-            if (category.id() != existingproduct.getCategory().getId()) {
-                categoryId = category.id();
+            if (category.getId() != existingproduct.getCategory().getId()) {
+                categoryId = category.getId();
             }
         }
         ProductInputRecord updatedDetails = new ProductInputRecord(
@@ -193,12 +190,12 @@ public class ProductControllerTest {
     @Test
     void updateProduct_WithInvalidData_ShouldReturnBadRequest() {
         var existingproduct = productService.getAllProducts().getFirst();
-        var categories = categoryService.getAllCategoryRecords();
+        var categories = categoryRepository.findAll();
         Long categoryId = null;
 
         for (var category : categories) {
-            if (category.id() != existingproduct.getCategory().getId()) {
-                categoryId = category.id();
+            if (category.getId() != existingproduct.getCategory().getId()) {
+                categoryId = category.getId();
             }
         }
         ProductInputRecord updatedDetails = new ProductInputRecord(
