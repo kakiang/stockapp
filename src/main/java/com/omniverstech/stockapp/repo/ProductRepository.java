@@ -29,4 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT DISTINCT p FROM Product p JOIN FETCH p.category WHERE p.category.id = :id")
     List<Product> findAllByCategory_Id(@Param("id")  Long categoryId);
 
+    @Query("SELECT p FROM Product p JOIN FETCH p.category ORDER BY p.price DESC LIMIT :limit")
+    List<Product> findTopByPrice(@Param("limit") Integer limit);
+
 }

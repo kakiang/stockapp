@@ -4,6 +4,7 @@ import com.omniverstech.stockapp.entities.Category;
 import com.omniverstech.stockapp.entities.Product;
 import com.omniverstech.stockapp.entities.projection.ProductInputRecord;
 import com.omniverstech.stockapp.entities.projection.ProductRecord;
+import com.omniverstech.stockapp.repo.CategoryRepository;
 import com.omniverstech.stockapp.repo.ProductRepository;
 import com.omniverstech.stockapp.service.CategoryService;
 import com.omniverstech.stockapp.service.ProductService;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,9 @@ public class ProductControllerTest {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private ProductRepository productRepository;
@@ -249,4 +254,25 @@ public class ProductControllerTest {
                 Void.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
+
+    @Test
+    void getTopProductsByPrice_ShouldReturnTopProductsWithHighestPrice() {
+        Product laptop = new Product("EXP1", "Expensive Laptop", BigDecimal.valueOf(3999.99));
+        Product phone = new Product("EXP2", "Expensive Smartphone", BigDecimal.valueOf(3699.99));
+        var electronics = categoryRepository.findAll().getFirst();
+        laptop.setCategory(electronics);
+        phone.setCategory(electronics);
+        productRepository.saveAll(List.of(laptop, phone));
+
+        ResponseEntity<List<ProductRecord>> response = restTemplate.exchange(
+                "/api/products/price?top=2",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(2);
+        assertThat(response.getBody().getFirst().productCode().contains("EXP"));
+    }
+
 }

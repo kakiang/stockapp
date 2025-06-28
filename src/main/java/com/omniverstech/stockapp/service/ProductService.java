@@ -83,5 +83,9 @@ public class ProductService {
         productRepository.deleteAll();
     }
 
+    public List<Product> getTopByPrice(Integer limit) {
+        return productRepository.findTopByPrice(limit);
+    }
+
 
 }

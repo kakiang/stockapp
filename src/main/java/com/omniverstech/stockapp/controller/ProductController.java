@@ -59,5 +59,14 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/price")
+    public ResponseEntity<List<ProductRecord>> getTopProductsByPrice(
+            @RequestParam(name = "top") Integer top) {
+        var all = productService.getTopByPrice(top).stream()
+                .map(ProductRecord::new)
+                .toList();
+        return ResponseEntity.ok(all);
+    }
 }
 
